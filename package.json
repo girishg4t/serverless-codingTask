@@ -1,0 +1,29 @@
+{
+  "name": "sampletest",
+  "version": "1.0.0",
+  "description": "",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/girishg4t/serverless-codingTask.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/girishg4t/serverless-codingTask/issues"
+  },
+  "homepage": "https://github.com/girishg4t/serverless-codingTask#readme",
+  "devDependencies": {
+    "serverless-offline": "^5.8.0"
+  },
+  "dependencies": {
+    "joi": "^14.3.1",
+    "serverless-dynamodb-client": "0.0.2",
+    "serverless-dynamodb-local": "^0.2.35",
+    "serverless-offline-dynamodb-streams": "^2.0.0",
+    "serverless-plugin-offline-dynamodb-stream": "^1.0.18"
+  }
+}
