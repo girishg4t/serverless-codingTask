@@ -15,7 +15,7 @@ module.exports = {
 async function handler(event, context, callback) {
     try {
         const task = JSON.parse(event.body);
-        const result = await service.doSomething(task);
+        const result = await service.createTask(task);
 
         return response.ok({ data: result });
     } catch(err) {
@@ -27,9 +27,10 @@ async function handler(event, context, callback) {
 async function processItem(event, context, callback) {
     try {
         console.log('[new dynamodb event received] :=> ', JSON.stringify(event));
-        const task = JSON.parse(event.body);
-        console.log(task);
-        callback(null, response.ok({ data: task }));
+        const result = await service.updateTask(event);
+
+        return response.ok({ data: result });
+       
     } catch(err) {
         callback(err, response.serverError(err));
     }

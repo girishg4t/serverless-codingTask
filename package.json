@@ -17,13 +17,11 @@
   },
   "homepage": "https://github.com/girishg4t/serverless-codingTask#readme",
   "devDependencies": {
-    "serverless-offline": "^5.8.0"
+    "serverless-offline": "^5.8.0",
+    "serverless-dynamodb-local": "^0.2.35"
   },
   "dependencies": {
     "joi": "^14.3.1",
-    "serverless-dynamodb-client": "0.0.2",
-    "serverless-dynamodb-local": "^0.2.35",
-    "serverless-offline-dynamodb-streams": "^2.0.0",
-    "serverless-plugin-offline-dynamodb-stream": "^1.0.18"
+    "serverless-dynamodb-client": "0.0.2"
   }
 }

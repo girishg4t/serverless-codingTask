@@ -16,61 +16,49 @@ service: some-service # NOTE: update this with your service name
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
-custom: ${file(config/dev-env.json)}
+custom: ${file(config/${opt:stage}-env.json)}
 provider:
   name: aws
   runtime: nodejs8.10
   memorySize: 128
   environment: ${self:custom}
+  DYNAMODB_TABLE: Tasks
+
 # you can overwrite defaults here
-#  region: us-east-1
+  region: us-east-1
 
 # you can add statements to the Lambda function's IAM Role here
-#  iamRoleStatements:
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:ListBucket"
-#      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:PutObject"
-#      Resource:
-#        Fn::Join:
-#          - ""
-#          - - "arn:aws:s3:::"
-#            - "Ref" : "ServerlessDeploymentBucket"
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.DYNAMODB_TABLE}"
+
 
 # you can define service wide environment variables here
 #  environment:
 #    variable1: value1
 
 # you can add packaging information here
-  serverless-offline-dynamodb-streams:
-    apiVersion: '2013-12-02'
-    endpoint: http://0.0.0.0:8000
-    region: us-east-1
-    accessKeyId: root
-    secretAccessKey: root
-    skipCacheInvalidation: false
-    readInterval: 500
+
 functions:
   handler:
     handler: handler.handler
     events:
       - http:
-          path: task
-          method: Post
-          cors: true
+          path: task/create
+          method: post
+          cors: true        
   processItem:
     handler: handler.processItem
     events:
       - stream:
-          enabled: true
           type: dynamodb
-          tableName: TaskGallery
-          arn: arn:aws:dynamodb:us-east-1:XXXXXX:table/TaskGallery/stream/2018-07-02T19:48:31.121
-          batchSize: 10
-          startingPosition: TRIM_HORIZON
+          batchSize: 100
+          enabled: true
+          arn: { "Fn::GetAtt": ["TaskDB", "StreamArn"] }
+
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
@@ -105,12 +93,6 @@ package:
     - prod-env.json
     - node_modules/aws-sdk/**
 
-plugins:
-#  - serverless-webpack
-  - serverless-offline
-  - serverless-dynamodb-local
-  - serverless-offline-dynamodb-streams
-
 resources:
   Resources:
     TaskDB:
@@ -123,16 +105,20 @@ resources:
           -
             AttributeName: name
             AttributeType: S
+
         KeySchema:
           -
             AttributeName: id
             KeyType: HASH
           -
             AttributeName: name
-            KeyType: RANGE
+            KeyType: RANGE          
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        TableName: TaskGallery
+        TableName: ${self:provider.DYNAMODB_TABLE}
         StreamSpecification:
           StreamViewType: NEW_IMAGE
+plugins:
+  - serverless-dynamodb-local
+  - serverless-offline
