@@ -2,10 +2,11 @@
 
 const Joi = require('joi');
 
-function Model(opts) {
+function Task(opts) {
     const validationError = Joi.validate(opts, {
         id: Joi.string().required(),
-        name: Joi.string().required()
+        name: Joi.string().required(),
+        slug: Joi.string()
     }).error;
 
     if(validationError !== null) {
@@ -15,4 +16,4 @@ function Model(opts) {
     Object.assign(this, opts);
 }
 
-module.exports = Model;
+module.exports = Task;

@@ -1,11 +1,11 @@
 'use strict';
 
-const config = require('./config/config');
+const AWS = require("aws-sdk");
 const response = require('./util/response');
+const TaskService = require('./services/taskService');
+const Task = require('./models/task');
 
-const Service = require('./services/service');
-
-const service = new Service();
+const taskService = new TaskService();
 
 module.exports = {
     handler,
@@ -14,11 +14,11 @@ module.exports = {
 
 async function handler(event, context, callback) {
     try {
-        const task = JSON.parse(event.body);
-        const result = await service.createTask(task);
-
-        return response.ok({ data: result });
-    } catch(err) {
+        const obj = JSON.parse(event.body);
+        const task = new Task(obj);
+        const result = await taskService.createTask(task);
+        callback(null, response.ok({ data: result }));
+    } catch (err) {
         callback(err, response.serverError(err));
     }
 };
@@ -26,11 +26,18 @@ async function handler(event, context, callback) {
 
 async function processItem(event, context, callback) {
     try {
-        const result = await service.updateTask(event);
+        const record = event.Records[0];
+        if (record && record.eventName == 'INSERT') {
+            var obj = AWS.DynamoDB.Converter.unmarshall(record.dynamodb.NewImage);
+            const task = new Task(obj);
+            const result = await taskService.updateTask(task);
+            callback(null, response.ok({ data: result }));
+        } else {
+            callback(null, response.forbidden({ error: `${record.eventName} not allowed` }));
+        }
 
-        return response.ok({ data: result });
-       
-    } catch(err) {
+
+    } catch (err) {
         callback(err, response.serverError(err));
     }
 };

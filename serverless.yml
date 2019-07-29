@@ -55,7 +55,7 @@ functions:
     events:
       - stream:
           type: dynamodb
-          batchSize: 100
+          batchSize: 1
           enabled: true
           arn: { "Fn::GetAtt": ["TaskDB", "StreamArn"] }
 
